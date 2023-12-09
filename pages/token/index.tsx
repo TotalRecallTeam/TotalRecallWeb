@@ -6,15 +6,79 @@ import { DialogWithdraw } from "@/components/Dialog";
 import { Layout } from "@/components/Layout";
 import { ALL_TOKENS, MY_BOUGHT_TOKENS, MY_DEPLOYED_TOKENS } from "@/consts";
 import { TableItem } from "@/types/crypto";
+import { getWalletClient } from "@wagmi/core";
+import { Client } from "@xmtp/xmtp-js";
 import { useRouter } from "next/router";
+import React from "react";
 import {
   PiArrowElbowRightDownFill,
   PiArrowFatLinesRight,
 } from "react-icons/pi";
+import { useAccount } from "wagmi";
+
+// await createConversation(xmtp, buyer_address);
+
+const add = [
+  "0xf5842e45243642C87726149ff1258b8d6D75c544",
+  "0xf5842e45243642C87726149ff1258b8d6D75c544",
+  "0xf5842e45243642C87726149ff1258b8d6D75c544",
+  "0xf5842e45243642C87726149ff1258b8d6D75c544",
+];
+export async function createConversation(xmtp, address) {
+  if (await isWalletActive(xmtp, address)) {
+    await xmtp.conversations.newConversation(address);
+  }
+}
+
+export async function loadMessages(xmtp: any, address: any) {
+  if (await isWalletActive(xmtp, address)) {
+    const conversation = await xmtp.conversations.newConversation(address);
+
+    const response = await conversation.messages();
+
+    const messages = [];
+    for (let i = 0; i < response.length; i++) {
+      messages.push(response[i].content);
+    }
+
+    return messages;
+  }
+}
+
+export async function isWalletActive(xmtp: any, address: any) {
+  const is_active = await xmtp.canMessage(address);
+
+  return is_active;
+}
+
+export async function broadcastMessage(
+  xmtp: any,
+  broadcast_address_array: any,
+  message: any
+) {
+  console.log(xmtp);
+  const broadcast_address_can_message_array = await isWalletActive(
+    xmtp,
+    broadcast_address_array
+  );
+  for (let i = 0; i < broadcast_address_array.length; i++) {
+    const to = broadcast_address_array[i];
+
+    const canMessage = broadcast_address_can_message_array[i];
+    if (canMessage) {
+      const conversation = await xmtp.conversations.newConversation(to);
+
+      const sent = await conversation.send(message);
+    }
+  }
+}
 
 const TokenPage = () => {
   const router = useRouter();
+
   const { id, tokenType } = router.query;
+  const { address, isConnected } = useAccount();
+  const [message, setMessage] = React.useState<any>();
 
   if (!id || !tokenType) {
     return <div>Invalid token</div>;
@@ -127,6 +191,11 @@ const TokenPage = () => {
                       <PiArrowFatLinesRight /> Message to Send
                     </h2>
                     <textarea
+                      value={message}
+                      onChange={(e) => {
+                        console.log(e.target.value);
+                        setMessage(e.target.value);
+                      }}
                       className="resize-none border rounded-md w-full p-2 focus:outline-none focus:ring focus:border-blue-300"
                       rows={4}
                       placeholder="Enter your text here..."
@@ -134,8 +203,13 @@ const TokenPage = () => {
                     <div className="flex justify-end mt-2">
                       <Button
                         title="Send message"
-                        onClick={() => {
+                        onClick={async () => {
+                          const walletClient = await getWalletClient();
                           alert("Message sent!");
+                          const xmtp = await Client.create(walletClient, {
+                            env: "dev",
+                          });
+                          await broadcastMessage(xmtp, add, message);
                         }}
                       ></Button>
                     </div>
@@ -149,6 +223,23 @@ const TokenPage = () => {
                       <PiArrowFatLinesRight /> Available Count:
                       {foundItem.activeCount}
                     </h2>
+                    {(async () => {
+                      const walletClient = await getWalletClient();
+                      if (isOwner) {
+                        const xmtp = await Client.create(walletClient, {
+                          env: "dev",
+                        });
+
+                        await createConversation(
+                          xmtp,
+                          "0xf5842e45243642C87726149ff1258b8d6D75c544"
+                        );
+                        const messages = await loadMessages(
+                          xmtp,
+                          "0xf5842e45243642C87726149ff1258b8d6D75c544"
+                        );
+                      }
+                    })()}
                     <span>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit,
                       sed do eiusmod tempor incididunt ut labore et dolore magna

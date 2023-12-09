@@ -1,44 +1,53 @@
 import { Layout } from "@/components/Layout";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   AnonAadhaarProof,
   LogInWithAnonAadhaar,
   useAnonAadhaar,
 } from "anon-aadhaar-react";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-const index = () => {
+const Index = () => {
   // Use the Country Identity hook to get the status of the user.
   const [anonAadhaar] = useAnonAadhaar();
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Anon Aadhaar: ", anonAadhaar.status);
-  }, [anonAadhaar]);
+    if (anonAadhaar.status === "logged-in") {
+      // router.push("/deploy");
+      console.log("Anon Aadhaar: ", anonAadhaar.pcd);
+    }
+  }, [anonAadhaar, router]);
 
   return (
     <Layout>
       <div className="min-h-screen bg-black-100 px-4 py-8">
-      <main className="flex flex-col items-center gap-8 bg-white rounded-2xl max-w-screen-sm mx-auto h-[24rem] md:h-[20rem] p-8">
-        <h1 className="font-bold text-2xl">Verify using Anon Aadhar for depositing RWA</h1>
-        <p>Prove your Identity anonymously using your Aadhaar card.</p>
+        <main className="flex flex-col items-center gap-8 bg-white rounded-2xl max-w-screen-sm mx-auto h-[24rem] md:h-[20rem] p-8">
+          <h1 className="font-bold text-2xl">
+            Verify using Anon Aadhar for depositing RWA
+          </h1>
+          <p>Prove your Identity anonymously using your Aadhaar card.</p>
 
-        {/* Import the Connect Button component */}
-        <LogInWithAnonAadhaar />
-      </main>
-      <div className="flex flex-col items-center gap-4 rounded-2xl max-w-screen-sm mx-auto p-8">
-        {/* Render the proof if generated and valid */}
-        {anonAadhaar?.status === "logged-in" && (
-          <>
-            <p className="text-white">✅ Proof is valid</p>
-            <p className="text-white">Got your Aadhaar Identity Proof</p>
-            <p className="text-white">Welcome anon!</p>
-            <AnonAadhaarProof code={JSON.stringify(anonAadhaar.pcd, null, 2)} />
-          </>
-        )}
+          {/* Import the Connect Button component */}
+          <LogInWithAnonAadhaar />
+        </main>
+        <div className="flex flex-col items-center gap-4 rounded-2xl max-w-screen-sm mx-auto p-8">
+          {/* Render the proof if generated and valid */}
+          {anonAadhaar?.status === "logged-in" && (
+            <>
+              <p className="text-white">✅ Proof is valid</p>
+              <p className="text-white">Got your Aadhaar Identity Proof</p>
+              <p className="text-white">Welcome anon!</p>
+              <AnonAadhaarProof
+                code={JSON.stringify(anonAadhaar.pcd, null, 2)}
+              />
+            </>
+          )}
+        </div>
       </div>
-    </div>
     </Layout>
   );
 };
 
-export default index;
+export default Index;

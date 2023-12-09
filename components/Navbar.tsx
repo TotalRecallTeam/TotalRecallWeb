@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { HiMenuAlt4 } from "react-icons/hi";
+import { PiCodesandboxLogoFill } from "react-icons/pi";
 
 const NavBarItem = ({
   title,
@@ -15,7 +16,10 @@ const NavBarItem = ({
   href: string;
 }) => (
   <Link href={href}>
-    <li className={`mx-4 cursor-pointer`}>{title}</li>
+    <li className={`mx-4 cursor-pointer flex items-center gap-2 text-2xl`}>
+      <PiCodesandboxLogoFill />
+      <span>{title}</span>
+    </li>
   </Link>
 );
 
