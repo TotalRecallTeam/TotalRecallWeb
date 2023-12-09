@@ -19,10 +19,10 @@ import { useAccount } from "wagmi";
 // await createConversation(xmtp, buyer_address);
 
 const add = [
-  "0xf5842e45243642C87726149ff1258b8d6D75c544",
-  "0xf5842e45243642C87726149ff1258b8d6D75c544",
-  "0xf5842e45243642C87726149ff1258b8d6D75c544",
-  "0xf5842e45243642C87726149ff1258b8d6D75c544",
+  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
+  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
+  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
+  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
 ];
 export async function createConversation(xmtp, address) {
   if (await isWalletActive(xmtp, address)) {
@@ -193,10 +193,9 @@ const TokenPage = () => {
                     <textarea
                       value={message}
                       onChange={(e) => {
-                        console.log(e.target.value);
                         setMessage(e.target.value);
                       }}
-                      className="resize-none border rounded-md w-full p-2 focus:outline-none focus:ring focus:border-blue-300"
+                      className="resize-none text-black border rounded-md w-full p-2 focus:outline-none focus:ring focus:border-blue-300"
                       rows={4}
                       placeholder="Enter your text here..."
                     />
@@ -205,10 +204,16 @@ const TokenPage = () => {
                         title="Send message"
                         onClick={async () => {
                           const walletClient = await getWalletClient();
-                          alert("Message sent!");
                           const xmtp = await Client.create(walletClient, {
                             env: "dev",
                           });
+                          await createConversation(
+                            xmtp,
+                            "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50"
+                          );
+
+                          alert("Message sent!");
+
                           await broadcastMessage(xmtp, add, message);
                         }}
                       ></Button>
@@ -230,10 +235,6 @@ const TokenPage = () => {
                           env: "dev",
                         });
 
-                        await createConversation(
-                          xmtp,
-                          "0xf5842e45243642C87726149ff1258b8d6D75c544"
-                        );
                         const messages = await loadMessages(
                           xmtp,
                           "0xf5842e45243642C87726149ff1258b8d6D75c544"
