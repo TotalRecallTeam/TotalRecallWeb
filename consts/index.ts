@@ -1,7 +1,10 @@
 import { TableItem } from "@/types/crypto";
 import { Address } from "viem";
 
-export const NAV = [{ title: "Tokens Dashboard", path: "/dashboard" }];
+export const NAV = [
+  { title: "Tokens Dashboard", path: "/dashboard" },
+  { title: "Query", path: "/query" },
+];
 
 export const TOKEN_ADDRESS: {
   tokenFactory: Address;
