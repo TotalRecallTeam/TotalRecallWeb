@@ -1,5 +1,8 @@
 import Button from "@/components/Button";
 import { Layout } from "@/components/Layout";
+import { TOKEN_ADDRESS } from "@/consts";
+import { vaultFactory } from "@/consts/abit";
+import { prepareWriteContract, writeContract } from "@wagmi/core";
 import { AnonAadhaarPCD, exportCallDataGroth16FromPCD } from "anon-aadhaar-pcd";
 import {
   AnonAadhaarProof,
@@ -8,6 +11,7 @@ import {
 } from "anon-aadhaar-react";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { Address } from "viem";
 
 const Index = () => {
   // Use the Country Identity hook to get the status of the user.
@@ -17,7 +21,6 @@ const Index = () => {
   useEffect(() => {
     console.log("Anon Aadhaar: ", anonAadhaar.status);
     if (anonAadhaar.status === "logged-in") {
-      // router.push("/deploy");
       console.log("Anon Aadhaar: ", anonAadhaar.pcd);
     }
   }, [anonAadhaar, router]);
@@ -40,8 +43,19 @@ const Index = () => {
           <LogInWithAnonAadhaar />
           <Button
             onClick={async () => {
-              debugger;
-              const result = await getproof(anonAadhaar.pcd);
+              // const { a, b, c, input } = await getproof(anonAadhaar.pcd);
+              const fac = TOKEN_ADDRESS.vaultFactory as Address;
+
+              const { request: approve } = await prepareWriteContract({
+                address: fac,
+                abi: vaultFactory,
+                functionName: "CreateNewVault",
+                args: [TOKEN_ADDRESS.tokenFactory],
+              });
+              const { hash } = await writeContract(approve);
+              router.push("./deploy");
+
+              console.log(hash);
             }}
             title="next"
           />

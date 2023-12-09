@@ -1,4 +1,4 @@
-export const vault = [
+export const vault_fac = [
   {
     inputs: [
       {

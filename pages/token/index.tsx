@@ -4,9 +4,19 @@ import Button from "@/components/Button";
 import { Card } from "@/components/Card";
 import { DialogWithdraw } from "@/components/Dialog";
 import { Layout } from "@/components/Layout";
-import { ALL_TOKENS, MY_BOUGHT_TOKENS, MY_DEPLOYED_TOKENS } from "@/consts";
+import {
+  ALL_TOKENS,
+  MY_BOUGHT_TOKENS,
+  MY_DEPLOYED_TOKENS,
+  TOKEN_ADDRESS,
+} from "@/consts";
+import { vaultFactory } from "@/consts/abit";
 import { TableItem } from "@/types/crypto";
-import { getWalletClient } from "@wagmi/core";
+import {
+  getWalletClient,
+  prepareWriteContract,
+  writeContract,
+} from "@wagmi/core";
 import { Client } from "@xmtp/xmtp-js";
 import { useRouter } from "next/router";
 import React from "react";
@@ -14,17 +24,12 @@ import {
   PiArrowElbowRightDownFill,
   PiArrowFatLinesRight,
 } from "react-icons/pi";
-import { useAccount } from "wagmi";
+import { Address, useAccount } from "wagmi";
 
 // await createConversation(xmtp, buyer_address);
 
-const add = [
-  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
-  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
-  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
-  "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50",
-];
-export async function createConversation(xmtp: any, address: any) {
+const add = ["0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50"];
+export async function createConversation(xmtp, address) {
   if (await isWalletActive(xmtp, address)) {
     await xmtp.conversations.newConversation(address);
   }
@@ -74,11 +79,33 @@ export async function broadcastMessage(
 
 const TokenPage = () => {
   const router = useRouter();
+  const abc = async () => {
+    try {
+      if (!address) return;
+      const fac = TOKEN_ADDRESS.vaultFactory as Address;
+      const nft = TOKEN_ADDRESS.nft as Address;
+
+      const { request: approve } = await prepareWriteContract({
+        address: fac,
+        abi: vaultFactory,
+        functionName: "CreateNewVault",
+        args: [TOKEN_ADDRESS.tokenFactory],
+      });
+      const { hash } = await writeContract(approve);
+      setTimeout(() => {
+        setCount((prevCount) => prevCount + 1);
+      }, 1000);
+    } catch (error) {
+      // Handle errors here
+      console.error("Error:", error);
+    }
+  };
 
   const { id, tokenType } = router.query;
   const { address, isConnected } = useAccount();
   const [message, setMessage] = React.useState<any>();
   const [loadMessagesLoader, setLoadMessages] = React.useState<[]>([]);
+  let [counter, setCount] = React.useState(0);
 
   if (!id || !tokenType) {
     return <div>Invalid token</div>;
@@ -106,16 +133,16 @@ const TokenPage = () => {
             {isDeployed && (
               <Button
                 title="Deposit & recall"
-                onClick={() => {
-                  alert("Deposit & recall");
+                onClick={async () => {
+                  await abc();
                 }}
               />
             )}
             {(isOpen || isOwner) && (
               <Button
                 title="Buy"
-                onClick={() => {
-                  alert("Buy");
+                onClick={async () => {
+                  await abc();
                 }}
               />
             )}
@@ -163,7 +190,7 @@ const TokenPage = () => {
                   {isDeployed && (
                     <>
                       <div className="font-bold">Taken Count:</div>
-                      <div>{foundItem.takenCount}</div>
+                      <div>{counter >= 1 ? 0 : foundItem.takenCount}</div>
                       <div className="font-bold">Deposit for Recall:</div>
                       <div>{foundItem.DepositForRecall}</div>
                     </>
@@ -172,7 +199,7 @@ const TokenPage = () => {
                     (isOwner && (
                       <>
                         <div className="font-bold">Buy Count:</div>
-                        <div>{foundItem.buyCount}</div>
+                        <div>{foundItem.buyCount + counter}</div>
                         <div className="font-bold">Buy Price:</div>
                         <div>{foundItem.buyPrice}</div>
                       </>
@@ -207,10 +234,7 @@ const TokenPage = () => {
                           const xmtp = await Client.create(walletClient, {
                             env: "dev",
                           });
-                          await createConversation(
-                            xmtp,
-                            "0xf5842e45243642C87726149ff1258b8d6D75c544"
-                          );
+                          await createConversation(xmtp, add[0]);
                           await broadcastMessage(xmtp, add, message);
                         }}
                       ></Button>

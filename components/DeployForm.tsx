@@ -1,15 +1,16 @@
-import { TOKEN_ADDRESS } from "@/consts";
 import { TableItem } from "@/types/crypto";
-import { prepareWriteContract, writeContract } from "@wagmi/core";
+import { useRouter } from "next/router";
 import React from "react";
 import { SubmitErrorHandler, useForm } from "react-hook-form";
-import { parseEther } from "viem";
-import { erc721ABI, useAccount } from "wagmi";
+import { useAccount } from "wagmi";
 
 type FormValues = Omit<TableItem & { rollOverPeriod: number }, "id">; // Exclude 'id' from TableItem for form
 
-export const DeployForm: React.FC = () => {
+export const DeployForm: React.FC<{ deployAddress: any }> = ({
+  deployAddress,
+}) => {
   const { register, handleSubmit, formState } = useForm();
+  const router = useRouter();
   const { address } = useAccount();
   const [state, setState] = React.useState<any>({
     tokenName: "",
@@ -20,20 +21,11 @@ export const DeployForm: React.FC = () => {
   });
 
   const onSubmit = async (data: any) => {
-    debugger;
     // Handle form submission logic here
-    console.log(data);
     setState(data);
     if (!address) return;
-
-    const { request: approve } = await prepareWriteContract({
-      address,
-      abi: erc721ABI,
-      functionName: "approve",
-      args: [TOKEN_ADDRESS.nft, parseEther("0")],
-    });
-    const { hash } = await writeContract(approve);
-    console.log(hash);
+    await deployAddress?.();
+    router.push("/token?id=ksnvlskvs&tokenType=deployed");
   };
 
   const onError: SubmitErrorHandler<FormValues> = (errors) => {

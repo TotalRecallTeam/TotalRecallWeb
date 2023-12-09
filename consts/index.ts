@@ -12,8 +12,8 @@ export const TOKEN_ADDRESS: {
   nft: Address;
 } = {
   tokenFactory: "0xE68dc1169dc1329A789ffF5B8d6AD271bdf19a96",
-  vaultFactory: "0x72016D0d73bF2B5232B748e1e31949261f9FdFFB",
-  nft: "0xF9ef2a1dd1EDE1CbcFD167F152658200d8A5488d",
+  vaultFactory: "0x6d7b4a4F1b5596781E841fa89c62BF5280c6aADa",
+  nft: "0x69FfBBb061afe9B2E04077C3b710e0c42645eb0F",
 };
 
 export const MY_DEPLOYED_TOKENS: TableItem[] = [
