@@ -6,15 +6,21 @@ import {
   LogInWithAnonAadhaar,
   useAnonAadhaar,
 } from "anon-aadhaar-react";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-const index = () => {
+const Index = () => {
   // Use the Country Identity hook to get the status of the user.
   const [anonAadhaar] = useAnonAadhaar();
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Anon Aadhaar: ", anonAadhaar.status);
-  }, [anonAadhaar]);
+    if (anonAadhaar.status === "logged-in") {
+      // router.push("/deploy");
+      console.log("Anon Aadhaar: ", anonAadhaar.pcd);
+    }
+  }, [anonAadhaar, router]);
 
   const getproof = async (_pcd: AnonAadhaarPCD) => {
     const { a, b, c, Input } = await exportCallDataGroth16FromPCD(_pcd);
@@ -59,4 +65,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;
