@@ -5,6 +5,7 @@ export const NAV = [
   { title: "Buyer", path: "/buyer" },
   { title: "Owner", path: "/owner" },
   { title: "Verify", path: "/verify"},
+  { title: "Query", path: "/query"},
 ];
 
 export const MY_DEPLOYED_TOKENS: TableItem[] = [

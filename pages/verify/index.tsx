@@ -5,6 +5,7 @@ import {
   LogInWithAnonAadhaar,
   useAnonAadhaar,
 } from "anon-aadhaar-react";
+import { AnonAadhaarPCD, exportCallDataGroth16FromPCD } from "anon-aadhaar-pcd";
 import { useEffect } from "react";
 
 const index = () => {
@@ -15,6 +16,10 @@ const index = () => {
     console.log("Anon Aadhaar: ", anonAadhaar.status);
   }, [anonAadhaar]);
 
+  const getproof = async (_pcd: AnonAadhaarPCD) => {
+    const { a, b, c, Input } = await exportCallDataGroth16FromPCD(_pcd);
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-black-100 px-4 py-8">
@@ -24,6 +29,7 @@ const index = () => {
 
         {/* Import the Connect Button component */}
         <LogInWithAnonAadhaar />
+        {/* {getproof(anonAadhaar.pcd)}; */}
       </main>
       <div className="flex flex-col items-center gap-4 rounded-2xl max-w-screen-sm mx-auto p-8">
         {/* Render the proof if generated and valid */}
