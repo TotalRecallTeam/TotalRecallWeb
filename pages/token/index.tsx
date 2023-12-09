@@ -209,16 +209,8 @@ const TokenPage = () => {
                           });
                           await createConversation(
                             xmtp,
-<<<<<<< HEAD
                             "0xf5842e45243642C87726149ff1258b8d6D75c544"
                           );
-=======
-                            "0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50"
-                          );
-
-                          alert("Message sent!");
-
->>>>>>> ae0f0203dbe3ae54dc146522eddb7a27f891dc3c
                           await broadcastMessage(xmtp, add, message);
                         }}
                       ></Button>
