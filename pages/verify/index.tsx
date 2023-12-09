@@ -29,7 +29,7 @@ const index = () => {
 
         {/* Import the Connect Button component */}
         <LogInWithAnonAadhaar />
-        {/* {getproof(anonAadhaar.pcd)}; */}
+        {getproof(anonAadhaar.pcd)};
       </main>
       <div className="flex flex-col items-center gap-4 rounded-2xl max-w-screen-sm mx-auto p-8">
         {/* Render the proof if generated and valid */}
