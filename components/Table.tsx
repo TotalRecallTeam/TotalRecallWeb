@@ -1,3 +1,5 @@
+import { TableItem } from "@/types/crypto";
+import { useRouter } from "next/router";
 import React from "react";
 
 interface Props {
@@ -5,20 +7,9 @@ interface Props {
   data: TableItem[];
 }
 
-interface TableItem {
-  tokenName: string;
-  itoPrice: string;
-  recallPrice: string;
-  nextRolloverTime: string;
-  takenCount: number;
-  totalCount: number;
-  activeCount: number;
-  totalCountCap: number;
-  status: string;
-}
-
 const TableComponent: React.FC<Props> = (props) => {
   const { title, data = [] } = props;
+  const router = useRouter();
 
   return (
     <div className="min-h-[250px]">
@@ -55,7 +46,15 @@ const TableComponent: React.FC<Props> = (props) => {
           </thead>
           <tbody>
             {data?.map((item, index) => (
-              <tr key={index} className="text-center">
+              <tr
+                key={index}
+                onClick={() => {
+                  router.push(
+                    `/token/?id=${item.id}&tokenType=${item.tokenType}`
+                  );
+                }}
+                className={`text-center cursor-pointer`}
+              >
                 <td className="py-2 px-2 border-b text-left  text-white font-light  text-base text-center ">
                   {item.tokenName}
                 </td>
