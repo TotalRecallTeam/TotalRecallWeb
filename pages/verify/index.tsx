@@ -1,4 +1,6 @@
+import Button from "@/components/Button";
 import { Layout } from "@/components/Layout";
+import { AnonAadhaarPCD, exportCallDataGroth16FromPCD } from "anon-aadhaar-pcd";
 import {
   AnonAadhaarProof,
   LogInWithAnonAadhaar,
@@ -20,6 +22,11 @@ const Index = () => {
     }
   }, [anonAadhaar, router]);
 
+  const getproof = async (_pcd: AnonAadhaarPCD) => {
+    const { a, b, c, Input } = await exportCallDataGroth16FromPCD(_pcd);
+    return { a, b, c, Input };
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-black-100 px-4 py-8">
@@ -31,6 +38,14 @@ const Index = () => {
 
           {/* Import the Connect Button component */}
           <LogInWithAnonAadhaar />
+          <Button
+            onClick={async () => {
+              debugger;
+              const result = await getproof(anonAadhaar.pcd);
+            }}
+            title="next"
+          />
+          {/* {getproof(anonAadhaar.pcd)}; */}
         </main>
         <div className="flex flex-col items-center gap-4 rounded-2xl max-w-screen-sm mx-auto p-8">
           {/* Render the proof if generated and valid */}
