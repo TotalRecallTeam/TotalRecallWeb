@@ -24,7 +24,7 @@ const add = [
   "0xf5842e45243642C87726149ff1258b8d6D75c544",
   "0xf5842e45243642C87726149ff1258b8d6D75c544",
 ];
-export async function createConversation(xmtp, address) {
+export async function createConversation(xmtp: any, address: any) {
   if (await isWalletActive(xmtp, address)) {
     await xmtp.conversations.newConversation(address);
   }
@@ -56,7 +56,6 @@ export async function broadcastMessage(
   broadcast_address_array: any,
   message: any
 ) {
-  console.log(xmtp);
   const broadcast_address_can_message_array = await isWalletActive(
     xmtp,
     broadcast_address_array
@@ -79,6 +78,7 @@ const TokenPage = () => {
   const { id, tokenType } = router.query;
   const { address, isConnected } = useAccount();
   const [message, setMessage] = React.useState<any>();
+  const [loadMessagesLoader, setLoadMessages] = React.useState<[]>([]);
 
   if (!id || !tokenType) {
     return <div>Invalid token</div>;
@@ -209,6 +209,10 @@ const TokenPage = () => {
                           const xmtp = await Client.create(walletClient, {
                             env: "dev",
                           });
+                          await createConversation(
+                            xmtp,
+                            "0xf5842e45243642C87726149ff1258b8d6D75c544"
+                          );
                           await broadcastMessage(xmtp, add, message);
                         }}
                       ></Button>
@@ -219,37 +223,35 @@ const TokenPage = () => {
               if (isOpen || isOwner) {
                 return (
                   <>
+                    <Button
+                      title={"Load messages"}
+                      onClick={async () => {
+                        const walletClient = await getWalletClient();
+                        if (isOwner) {
+                          const xmtp = await Client.create(walletClient, {
+                            env: "dev",
+                          });
+
+                          const messages = await loadMessages(
+                            xmtp,
+                            "0xf5842e45243642C87726149ff1258b8d6D75c544"
+                          );
+
+                          console.log(messages);
+                          setLoadMessages(messages);
+                          return null;
+                        }
+                      }}
+                    ></Button>
                     <h2 className="text-3xl text-white text-gradient flex items-center gap-4 mb-2">
                       <PiArrowFatLinesRight /> Available Count:
                       {foundItem.activeCount}
                     </h2>
-                    {(async () => {
-                      const walletClient = await getWalletClient();
-                      if (isOwner) {
-                        const xmtp = await Client.create(walletClient, {
-                          env: "dev",
-                        });
-
-                        await createConversation(
-                          xmtp,
-                          "0xf5842e45243642C87726149ff1258b8d6D75c544"
-                        );
-                        const messages = await loadMessages(
-                          xmtp,
-                          "0xf5842e45243642C87726149ff1258b8d6D75c544"
-                        );
-                      }
-                    })()}
-                    <span>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                      sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      Duis aute irure dolor in reprehenderit in voluptate velit
-                      esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                      sint occaecat cupidatat non proident, sunt in culpa qui
-                      officia deserunt mollit anim id est laborum
-                    </span>
+                    <div>
+                      {loadMessagesLoader?.map((i) => (
+                        <div key={i}>{i}</div>
+                      ))}
+                    </div>
                   </>
                 );
               }
