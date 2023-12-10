@@ -1,12 +1,20 @@
 import { TableItem } from "@/types/crypto";
+import { Address } from "viem";
 
 export const NAV = [
   { title: "Tokens Dashboard", path: "/dashboard" },
-  { title: "Buyer", path: "/buyer" },
-  { title: "Owner", path: "/owner" },
-  { title: "Verify", path: "/verify"},
-  { title: "Query", path: "/query"},
+  { title: "Query", path: "/query" },
 ];
+
+export const TOKEN_ADDRESS: {
+  tokenFactory: Address;
+  vaultFactory: Address;
+  nft: Address;
+} = {
+  tokenFactory: "0xE68dc1169dc1329A789ffF5B8d6AD271bdf19a96",
+  vaultFactory: "0x6d7b4a4F1b5596781E841fa89c62BF5280c6aADa",
+  nft: "0x69FfBBb061afe9B2E04077C3b710e0c42645eb0F",
+};
 
 export const MY_DEPLOYED_TOKENS: TableItem[] = [
   {

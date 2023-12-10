@@ -1,4 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { watchAccount } from "@wagmi/core";
 import { BsInfoCircle } from "react-icons/bs";
 import { PiHandCoinsBold } from "react-icons/pi";
 
@@ -10,6 +11,8 @@ export const Welcome = () => {
   const { data } = useBalance({
     address,
   });
+
+  const unwatch = watchAccount((account) => console.log("account", account));
 
   return (
     <div className="flex w-full justify-center items-center">

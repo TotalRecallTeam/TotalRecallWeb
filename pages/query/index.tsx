@@ -1,5 +1,5 @@
-import { init, useQuery } from "@airstack/airstack-react";
 import { Layout } from "@/components/Layout";
+import { init, useQuery } from "@airstack/airstack-react";
 
 init("1cd1f4c31e4f747c2aabf193868cd7014");
 
@@ -35,26 +35,26 @@ const Component = () => {
   const { data, loading, error } = useQuery(query);
 
   if (data) {
-    return(
-        <Layout>
-            <p className="text-white">Data: {JSON.stringify(data)}</p>
-        </Layout>
+    return (
+      <Layout>
+        <p className="text-white">Data: {JSON.stringify(data)}</p>
+      </Layout>
     );
   }
 
   if (loading) {
-    return(
-        <Layout>
-            <p className="text-white">Loading...</p>
-        </Layout>
+    return (
+      <Layout>
+        <p className="text-white">Loading...</p>
+      </Layout>
     );
   }
 
   if (error) {
-    return(
-        <Layout>
-            <p className="text-white">Error: {error.message}</p>
-        </Layout>
+    return (
+      <Layout>
+        <p className="text-white">Error: {error.message}</p>
+      </Layout>
     );
   }
 };

@@ -1,15 +1,31 @@
 import { TableItem } from "@/types/crypto";
+import { useRouter } from "next/router";
 import React from "react";
 import { SubmitErrorHandler, useForm } from "react-hook-form";
+import { useAccount } from "wagmi";
 
 type FormValues = Omit<TableItem & { rollOverPeriod: number }, "id">; // Exclude 'id' from TableItem for form
 
-export const DeployForm: React.FC = () => {
+export const DeployForm: React.FC<{ deployAddress: any }> = ({
+  deployAddress,
+}) => {
   const { register, handleSubmit, formState } = useForm();
+  const router = useRouter();
+  const { address } = useAccount();
+  const [state, setState] = React.useState<any>({
+    tokenName: "",
+    itoPrice: 0,
+    recallPrice: 0,
+    totalCount: 0,
+    recallTime: 0,
+  });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     // Handle form submission logic here
-    console.log(data);
+    setState(data);
+    if (!address) return;
+    await deployAddress?.();
+    router.push("/token?id=ksnvlskvs&tokenType=deployed");
   };
 
   const onError: SubmitErrorHandler<FormValues> = (errors) => {
@@ -45,7 +61,7 @@ export const DeployForm: React.FC = () => {
           </label>
           <input
             {...register("itoPrice")}
-            type="text"
+            type="number"
             id="itoPrice"
             className="mt-1 p-2 w-full border rounded-md text-black"
           />
@@ -60,53 +76,8 @@ export const DeployForm: React.FC = () => {
           </label>
           <input
             {...register("recallPrice")}
-            type="text"
-            id="recallPrice"
-            className="mt-1 p-2 w-full border rounded-md text-black"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label
-            htmlFor="nextRolloverTime"
-            className="block text-sm font-medium text-white"
-          >
-            Roll Over period
-          </label>
-          <input
-            {...register("rollOverPeriod")}
-            type="text"
-            id="nextRolloverTime"
-            className="mt-1 p-2 w-full border rounded-md text-black"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label
-            htmlFor="nextRolloverTime"
-            className="block text-sm font-medium text-white"
-          >
-            Next Rollover Time
-          </label>
-          <input
-            {...register("nextRolloverTime")}
-            type="text"
-            id="nextRolloverTime"
-            className="mt-1 p-2 w-full border rounded-md text-black"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label
-            htmlFor="takenCount"
-            className="block text-sm font-medium text-white"
-          >
-            Taken Count
-          </label>
-          <input
-            {...register("takenCount")}
             type="number"
-            id="takenCount"
+            id="recallPrice"
             className="mt-1 p-2 w-full border rounded-md text-black"
           />
         </div>
@@ -122,6 +93,20 @@ export const DeployForm: React.FC = () => {
             {...register("totalCount")}
             type="number"
             id="totalCount"
+            className="mt-1 p-2 w-full border rounded-md text-black"
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="recallTime"
+            className="block text-sm font-medium text-white"
+          >
+            Recall Time
+          </label>
+          <input
+            {...register("recallTime")}
+            type="number"
+            id="recallTime"
             className="mt-1 p-2 w-full border rounded-md text-black"
           />
         </div>

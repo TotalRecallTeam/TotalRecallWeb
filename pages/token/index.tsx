@@ -4,17 +4,108 @@ import Button from "@/components/Button";
 import { Card } from "@/components/Card";
 import { DialogWithdraw } from "@/components/Dialog";
 import { Layout } from "@/components/Layout";
-import { ALL_TOKENS, MY_BOUGHT_TOKENS, MY_DEPLOYED_TOKENS } from "@/consts";
+import {
+  ALL_TOKENS,
+  MY_BOUGHT_TOKENS,
+  MY_DEPLOYED_TOKENS,
+  TOKEN_ADDRESS,
+} from "@/consts";
+import { vaultFactory } from "@/consts/abit";
 import { TableItem } from "@/types/crypto";
+import {
+  getWalletClient,
+  prepareWriteContract,
+  writeContract,
+} from "@wagmi/core";
+import { Client } from "@xmtp/xmtp-js";
 import { useRouter } from "next/router";
+import React from "react";
 import {
   PiArrowElbowRightDownFill,
   PiArrowFatLinesRight,
 } from "react-icons/pi";
+import { Address, useAccount } from "wagmi";
+
+// await createConversation(xmtp, buyer_address);
+
+const add = ["0x1c1D378532523440F8e6dbBf05b0Eb938bCC0f50"];
+export async function createConversation(xmtp, address) {
+  if (await isWalletActive(xmtp, address)) {
+    await xmtp.conversations.newConversation(address);
+  }
+}
+
+export async function loadMessages(xmtp: any, address: any) {
+  if (await isWalletActive(xmtp, address)) {
+    const conversation = await xmtp.conversations.newConversation(address);
+
+    const response = await conversation.messages();
+
+    const messages = [];
+    for (let i = 0; i < response.length; i++) {
+      messages.push(response[i].content);
+    }
+
+    return messages;
+  }
+}
+
+export async function isWalletActive(xmtp: any, address: any) {
+  const is_active = await xmtp.canMessage(address);
+
+  return is_active;
+}
+
+export async function broadcastMessage(
+  xmtp: any,
+  broadcast_address_array: any,
+  message: any
+) {
+  const broadcast_address_can_message_array = await isWalletActive(
+    xmtp,
+    broadcast_address_array
+  );
+  for (let i = 0; i < broadcast_address_array.length; i++) {
+    const to = broadcast_address_array[i];
+
+    const canMessage = broadcast_address_can_message_array[i];
+    if (canMessage) {
+      const conversation = await xmtp.conversations.newConversation(to);
+
+      const sent = await conversation.send(message);
+    }
+  }
+}
 
 const TokenPage = () => {
   const router = useRouter();
+  const abc = async () => {
+    try {
+      if (!address) return;
+      const fac = TOKEN_ADDRESS.vaultFactory as Address;
+      const nft = TOKEN_ADDRESS.nft as Address;
+
+      const { request: approve } = await prepareWriteContract({
+        address: fac,
+        abi: vaultFactory,
+        functionName: "CreateNewVault",
+        args: [TOKEN_ADDRESS.tokenFactory],
+      });
+      const { hash } = await writeContract(approve);
+      setTimeout(() => {
+        setCount((prevCount) => prevCount + 1);
+      }, 1000);
+    } catch (error) {
+      // Handle errors here
+      console.error("Error:", error);
+    }
+  };
+
   const { id, tokenType } = router.query;
+  const { address, isConnected } = useAccount();
+  const [message, setMessage] = React.useState<any>();
+  const [loadMessagesLoader, setLoadMessages] = React.useState<[]>([]);
+  let [counter, setCount] = React.useState(0);
 
   if (!id || !tokenType) {
     return <div>Invalid token</div>;
@@ -42,16 +133,16 @@ const TokenPage = () => {
             {isDeployed && (
               <Button
                 title="Deposit & recall"
-                onClick={() => {
-                  alert("Deposit & recall");
+                onClick={async () => {
+                  await abc();
                 }}
               />
             )}
             {(isOpen || isOwner) && (
               <Button
                 title="Buy"
-                onClick={() => {
-                  alert("Buy");
+                onClick={async () => {
+                  await abc();
                 }}
               />
             )}
@@ -99,7 +190,7 @@ const TokenPage = () => {
                   {isDeployed && (
                     <>
                       <div className="font-bold">Taken Count:</div>
-                      <div>{foundItem.takenCount}</div>
+                      <div>{counter >= 1 ? 0 : foundItem.takenCount}</div>
                       <div className="font-bold">Deposit for Recall:</div>
                       <div>{foundItem.DepositForRecall}</div>
                     </>
@@ -108,7 +199,7 @@ const TokenPage = () => {
                     (isOwner && (
                       <>
                         <div className="font-bold">Buy Count:</div>
-                        <div>{foundItem.buyCount}</div>
+                        <div>{foundItem.buyCount + counter}</div>
                         <div className="font-bold">Buy Price:</div>
                         <div>{foundItem.buyPrice}</div>
                       </>
@@ -127,15 +218,24 @@ const TokenPage = () => {
                       <PiArrowFatLinesRight /> Message to Send
                     </h2>
                     <textarea
-                      className="resize-none border rounded-md w-full p-2 focus:outline-none focus:ring focus:border-blue-300"
+                      value={message}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                      }}
+                      className="resize-none text-black border rounded-md w-full p-2 focus:outline-none focus:ring focus:border-blue-300"
                       rows={4}
                       placeholder="Enter your text here..."
                     />
                     <div className="flex justify-end mt-2">
                       <Button
                         title="Send message"
-                        onClick={() => {
-                          alert("Message sent!");
+                        onClick={async () => {
+                          const walletClient = await getWalletClient();
+                          const xmtp = await Client.create(walletClient, {
+                            env: "dev",
+                          });
+                          await createConversation(xmtp, add[0]);
+                          await broadcastMessage(xmtp, add, message);
                         }}
                       ></Button>
                     </div>
@@ -145,20 +245,35 @@ const TokenPage = () => {
               if (isOpen || isOwner) {
                 return (
                   <>
+                    <Button
+                      title={"Load messages"}
+                      onClick={async () => {
+                        const walletClient = await getWalletClient();
+                        if (isOwner) {
+                          const xmtp = await Client.create(walletClient, {
+                            env: "dev",
+                          });
+
+                          const messages = await loadMessages(
+                            xmtp,
+                            "0xf5842e45243642C87726149ff1258b8d6D75c544"
+                          );
+
+                          console.log(messages);
+                          setLoadMessages(messages);
+                          return null;
+                        }
+                      }}
+                    ></Button>
                     <h2 className="text-3xl text-white text-gradient flex items-center gap-4 mb-2">
                       <PiArrowFatLinesRight /> Available Count:
                       {foundItem.activeCount}
                     </h2>
-                    <span>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                      sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      Duis aute irure dolor in reprehenderit in voluptate velit
-                      esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                      sint occaecat cupidatat non proident, sunt in culpa qui
-                      officia deserunt mollit anim id est laborum
-                    </span>
+                    <div>
+                      {loadMessagesLoader?.map((i) => (
+                        <div key={i}>{i}</div>
+                      ))}
+                    </div>
                   </>
                 );
               }

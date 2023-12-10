@@ -7,17 +7,18 @@ import "@rainbow-me/rainbowkit/styles.css";
 import {
   argentWallet,
   ledgerWallet,
+  metaMaskWallet,
   trustWallet,
 } from "@rainbow-me/rainbowkit/wallets";
+import { AnonAadhaarProvider } from "anon-aadhaar-react";
 import type { AppProps } from "next/app";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { baseGoerli } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import "../styles/globals.css";
-import { AnonAadhaarProvider } from "anon-aadhaar-react";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [goerli],
+  [baseGoerli],
   [publicProvider()]
 );
 
@@ -42,6 +43,7 @@ const connectors = connectorsForWallets([
       argentWallet({ projectId, chains }),
       trustWallet({ projectId, chains }),
       ledgerWallet({ projectId, chains }),
+      metaMaskWallet({ projectId, chains, shimDisconnect: true }),
     ],
   },
 ]);
@@ -50,7 +52,6 @@ const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
   publicClient,
-  webSocketPublicClient,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -58,8 +59,8 @@ function MyApp({ Component, pageProps }: AppProps) {
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider appInfo={demoAppInfo} chains={chains}>
         <AnonAadhaarProvider _appId={app_id}>
-        <Component {...pageProps} />
-        </AnonAadhaarProvider >
+          <Component {...pageProps} />
+        </AnonAadhaarProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   );
