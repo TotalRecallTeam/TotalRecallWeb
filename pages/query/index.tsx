@@ -5,7 +5,7 @@ init("1cd1f4c31e4f747c2aabf193868cd7014");
 
 const query = `query MyQuery {
     TokenBalances(
-      input: {filter: {tokenAddress: {_in: ["0x63ae1fF822c4C8da7f48c965bd7C2C922Ce59dcC"]}}, blockchain: ethereum, limit: 30}
+      input: {filter: {tokenAddress: {_in: ["0x63ae1fF822c4C8da7f48c965bd7C2C922Ce59dcC"]}}, blockchain: polygon, limit: 30}
     ) {
       TokenBalance {
         owner {
